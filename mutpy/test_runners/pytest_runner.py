@@ -92,7 +92,7 @@ class PytestTestSuite(BaseTestSuite):
 
     def __iter__(self):
         mutpy_plugin = PytestMutpyTestDiscoveryPlugin()
-        pytest.main(list(self.tests) + ['-p', 'no:terminal'], plugins=[mutpy_plugin])
+        pytest.main(list(self.tests) + ['--collect-only', '-p', 'no:terminal'], plugins=[mutpy_plugin])
         for test in mutpy_plugin.tests:
             yield PytestTest(test)
 
