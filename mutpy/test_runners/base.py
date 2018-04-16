@@ -202,15 +202,18 @@ class BaseTestRunner:
         return result, timer.stop()
 
     def find_init_modules(self):
-        test_runner_class = utils.get_mutation_test_runner_class()
-        test_runner = test_runner_class(suite=self.create_empty_test_suite())
-        test_runner.start()
+        #test_runner_class = utils.get_mutation_test_runner_class()
+        #test_runner = test_runner_class(suite=self.create_empty_test_suite())
+        #test_runner.start()
+        #suite = self.create_empty_test_suite()
+        #suite.run()
         return list(sys.modules.keys())
 
     def remove_loaded_modules(self):
         for module in list(sys.modules.keys()):
             if module not in self.init_modules:
-                del sys.modules[module]
+                pass
+                #del sys.modules[module]
 
     def mark_not_covered_tests_as_skip(self, mutations, coverage_result, suite):
         mutated_nodes = {mutation.node.marker for mutation in mutations}

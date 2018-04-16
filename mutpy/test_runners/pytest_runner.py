@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import pytest
 
 from mutpy.test_runners.base import BaseTestSuite, BaseTestRunner, MutationTestResult, CoverageTestResult, BaseTest
@@ -7,16 +9,13 @@ class PytestMutpyPlugin:
 
     def __init__(self, skipped_tests):
         self.skipped_tests = skipped_tests
-        self.is_failed = {}
         self.mutation_test_result = MutationTestResult()
 
     def has_failed_before(self, nodeid):
-        if nodeid in self.is_failed:
-            return self.is_failed[nodeid]
-        return False
+        return next((test for test in self.mutation_test_result.failed if test.name == nodeid), None) is not None
 
-    def set_failed(self, nodeid):
-        self.is_failed[nodeid] = True
+    def has_been_skipped_before(self, nodeid):
+        return next((test for test in self.mutation_test_result.skipped if test.name == nodeid), None) is not None
 
     def pytest_collection_modifyitems(self, items):
         for item in items:
@@ -30,10 +29,13 @@ class PytestMutpyPlugin:
             if 'TypeError' in report.longrepr.reprcrash.message:
                 self.mutation_test_result.set_type_error(self._recreate_type_error(report.longrepr.reprcrash.message))
             else:
+                if not hasattr(report, 'longreprtext'):
+                    with open("Output.txt", "w") as text_file:
+                        text_file.write(report.nodeid+' '+vars(report))
                 self.mutation_test_result.add_failed(report.nodeid, report.longrepr.reprcrash.message.splitlines()[0],
                                                      report.longreprtext)
-            self.set_failed(report.nodeid)
-        elif report.passed and report.when == 'teardown' and not self.has_failed_before(report.nodeid):
+        elif report.passed and report.when == 'teardown' and not self.has_failed_before(report.nodeid) \
+                and not self.has_been_skipped_before(report.nodeid):
             self.mutation_test_result.add_passed(report.nodeid)
 
     @staticmethod
@@ -74,8 +76,10 @@ class PytestTestSuite(BaseTestSuite):
     def add_tests(self, test_module, target_test):
         if target_test:
             self.tests.add('{0}::{1}'.format(test_module.__file__, target_test))
-        else:
+        elif hasattr(test_module, '__file__'):
             self.tests.add(test_module.__file__)
+        else:
+            self.tests.add(test_module.__name__)
 
     def skip_test(self, test):
         self.skipped_tests.add(test.internal_test_obj.nodeid)

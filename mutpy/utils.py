@@ -206,13 +206,16 @@ class InjectImporter:
 class StdoutManager:
     def __init__(self, disable=True):
         self.disable = disable
+        self.original_stdout = None
 
     def __enter__(self):
         if self.disable:
+            self.original_stdout = sys.stdout
             sys.stdout = StringIO()
 
     def __exit__(self, type, value, traceback):
-        sys.stdout = sys.__stdout__
+        if self.disable:
+            sys.stdout = self.original_stdout
 
 
 class Timer:

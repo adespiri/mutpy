@@ -4,6 +4,7 @@ import types
 import unittest
 
 from mutpy import controller, operators, utils, codegen
+from mutpy.test.utils import MockModulesLoader
 from mutpy.test_runners import UnittestTestRunner
 
 
@@ -47,23 +48,6 @@ class MutationScoreTest(unittest.TestCase):
 
         self.assertEqual(self.score.covered_nodes, 1)
         self.assertEqual(self.score.all_nodes, 1)
-
-
-class MockModulesLoader:
-    def __init__(self, name, source):
-        self.names = [name]
-        self.source = source
-        self.module = types.ModuleType(name)
-        self.module.__file__ = '<string>'
-        self.load()
-
-    def load(self, *args, **kwargs):
-        exec(self.source, self.module.__dict__)
-        sys.modules[self.names[0]] = self.module
-        return [(self.module, None)]
-
-    def get_source(self):
-        return self.source
 
 
 class MockMutationController(controller.MutationController):
