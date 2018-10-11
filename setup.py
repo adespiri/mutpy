@@ -19,13 +19,15 @@ with open('README.rst') as f:
 setup(
     name='MutPy',
     version=mutpy.__version__,
+    python_requires='>=3.3',
     description='Mutation testing tool for Python 3.x source code.',
     long_description=long_description,
     author='Konrad Hałas',
     author_email='halas.konrad@gmail.com',
     url='https://github.com/mutpy/mutpy',
     download_url='https://github.com/mutpy/mutpy',
-    packages=['mutpy'],
+    packages=['mutpy', 'mutpy.operators'],
+    package_data={'mutpy': ['templates/*.html']},
     scripts=['bin/mut.py'],
     install_requires=requirements,
     extras_require={
